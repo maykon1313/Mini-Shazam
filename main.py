@@ -41,7 +41,7 @@ def buscar():
 		buscar_musica(str(caminho), banco)
 
 def main():
-	ind = False
+	ind = True
 	bus = True
 
 	if ind:

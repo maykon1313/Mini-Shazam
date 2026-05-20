@@ -1,9 +1,21 @@
-from src.padronizacao import carregar_audio
+from pathlib import Path
+
+from src.padronizacao import carregar_audio, TAXA_AMOSTRAGEM
 from src.STFT import calcular_espectrograma
 from src.picos import encontrar_picos
 from src.hashes import gerar_hashes
+from src.imagens import plot_espectrograma, plot_histograma_offsets, plot_mapa_constelacao, plot_sinal_tempo
 
-def shazam(caminho_arquivo):
+def _base_dir():
+	return Path(__file__).resolve().parents[1]
+
+def _caminho_imagem(base_dir, subpasta, categoria, nome_base, sufixo):
+	return base_dir / "images" / subpasta / categoria / f"{nome_base}_{sufixo}.png"
+
+def shazam(caminho_arquivo, categoria, base_dir=None):
+	base_dir = base_dir or _base_dir()
+	nome_base = Path(caminho_arquivo).stem
+
 	# Carrega o sinal no dominio do tempo.
 	sinal = carregar_audio(caminho_arquivo)
 
@@ -13,13 +25,32 @@ def shazam(caminho_arquivo):
 	# Extrai os picos de maior energia (em segundos e Hz).
 	picos = encontrar_picos(espectrograma, frequencias, tempos)
 
+	plot_sinal_tempo(
+		sinal,
+		TAXA_AMOSTRAGEM,
+		_caminho_imagem(base_dir, "raw", categoria, nome_base, "sinal"),
+		f"Sinal no tempo - {nome_base}",
+	)
+	plot_espectrograma(
+		espectrograma,
+		frequencias,
+		tempos,
+		_caminho_imagem(base_dir, "espectograma", categoria, nome_base, "espectrograma"),
+		f"Espectrograma - {nome_base}",
+	)
+	plot_mapa_constelacao(
+		picos,
+		_caminho_imagem(base_dir, "mapa_de_constelacao", categoria, nome_base, "constelacao"),
+		f"Mapa de constelacao - {nome_base}",
+	)
+
 	# Gera os hashes com base nas distancias entre picos.
 	hashes = gerar_hashes(picos)
 
 	return hashes
 
 def indexar_musica(caminho_arquivo, nome_musica, banco_dados):
-	hashes = shazam(caminho_arquivo)
+	hashes = shazam(caminho_arquivo, "musicas")
 
 	for chave, tempo_ancora in hashes:
 		if chave not in banco_dados:
@@ -27,7 +58,10 @@ def indexar_musica(caminho_arquivo, nome_musica, banco_dados):
 		banco_dados[chave].append((nome_musica, tempo_ancora))
 
 def buscar_musica(caminho_gravacao, banco_dados):
-	hashes = shazam(caminho_gravacao)
+	base_dir = _base_dir()
+	nome_base = Path(caminho_gravacao).stem
+
+	hashes = shazam(caminho_gravacao, "gravacao", base_dir=base_dir)
 
 	contagem = {}
 
@@ -62,6 +96,11 @@ def buscar_musica(caminho_gravacao, banco_dados):
 		print("Nao encontrada")
 	else:
 		print("Resultado:", melhor_musica)
+		plot_histograma_offsets(
+			contagem.get(melhor_musica, {}),
+			_caminho_imagem(base_dir, "histograma", "gravacao", nome_base, "offsets"),
+			f"Histograma de offsets - {melhor_musica}",
+		)
 
 # shazam(caminho_arquivo)
 # 	- Objetivo: Extrair os hashes únicos de um arquivo de áudio.
