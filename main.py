@@ -20,7 +20,7 @@ def carregar_banco(caminho_arquivo):
 def indexar():
 	banco = {}
 
-	print("Indexando músicas para o banco de dados.")
+	print("\nIndexando músicas para o banco de dados.")
 	
 	for caminho in sorted(MUSICAS.glob("*.mp3")):
 		nome = caminho.stem
@@ -33,15 +33,15 @@ def indexar():
 def buscar():
 	banco = carregar_banco(BANCO)
 
-	print("Buscando correspondencia para os áudios.")
+	print("\nBuscando correspondencia para os áudios.")
 
 	for caminho in sorted(GRAVACOES.glob("*.mp3")):
 		nome = caminho.stem
-		print("Buscando:", nome)
+		print("\nBuscando:", nome)
 		buscar_musica(str(caminho), banco)
 
 def main():
-	ind = True
+	ind = False
 	bus = True
 
 	if ind:
