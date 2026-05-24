@@ -20,13 +20,18 @@ def plot_sinal_tempo(sinal, taxa_amostragem, caminho_arquivo, titulo):
 
 def plot_espectrograma(espectrograma_db, frequencias, tempos, caminho_arquivo, titulo):
 	fig, ax = plt.subplots(figsize=(10, 4))
-	extent = [tempos[0], tempos[-1], frequencias[0], frequencias[-1]]
-	im = ax.imshow(espectrograma_db, origin="lower", aspect="auto", extent=extent, cmap="magma",)
+    
+    # O pcolormesh é a melhor forma de desenhar a "onda" do escalograma
+	
+	im = ax.pcolormesh(tempos, frequencias, espectrograma_db, cmap="viridis", shading="auto")
+    
 	ax.set_title(titulo)
 	ax.set_xlabel("Tempo (s)")
 	ax.set_ylabel("Frequencia (Hz)")
-	fig.colorbar(im, ax=ax, label="Energia (dB)")
+	fig.colorbar(im, ax=ax, label="Energia Wavelet (dB)")
+    
 	_finalizar_figura(fig, caminho_arquivo)
+
 
 def plot_mapa_constelacao(picos, caminho_arquivo, titulo):
 	if not picos:
@@ -54,3 +59,17 @@ def plot_histograma_offsets(offsets_contagem, caminho_arquivo, titulo):
 	ax.set_xlabel("Offset (s)")
 	ax.set_ylabel("Contagem")
 	_finalizar_figura(fig, caminho_arquivo)
+
+
+def plot_escalograma(escalograma_db, frequencias, tempos, caminho_arquivo, titulo):
+    fig, ax = plt.subplots(figsize=(10, 4))
+    
+    # O pcolormesh é a melhor forma de desenhar a "onda" do escalograma
+    im = ax.pcolormesh(tempos, frequencias, escalograma_db, cmap="viridis", shading="auto")
+    
+    ax.set_title(titulo)
+    ax.set_xlabel("Tempo (s)")
+    ax.set_ylabel("Frequencia (Hz)")
+    fig.colorbar(im, ax=ax, label="Energia Wavelet (dB)")
+    
+    _finalizar_figura(fig, caminho_arquivo)
